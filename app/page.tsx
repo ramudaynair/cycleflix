@@ -9,15 +9,36 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(false)
 
   useEffect(() => {
-    const shouldShowSplash = sessionStorage.getItem('showSplash')
-    if (shouldShowSplash === 'true') {
+    // Check if we should show splash based on scroll position
+    const savedScrollY = sessionStorage.getItem('scrollPosition')
+    const scrollPosition = savedScrollY ? parseInt(savedScrollY) : 0
+    
+    // Only show splash if we're at the top (intro section)
+    if (scrollPosition < 100) {
       setShowSplash(true)
-      sessionStorage.removeItem('showSplash')
+    }
+    
+    // Restore scroll position after component mounts
+    if (savedScrollY) {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition)
+        sessionStorage.removeItem('scrollPosition')
+      }, showSplash ? 0 : 100)
     }
   }, [])
 
   const handleSplashComplete = useCallback(() => {
     setShowSplash(false)
+  }, [])
+
+  useEffect(() => {
+    // Save scroll position on page unload
+    const handleBeforeUnload = () => {
+      sessionStorage.setItem('scrollPosition', window.scrollY.toString())
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [])
 
   return (

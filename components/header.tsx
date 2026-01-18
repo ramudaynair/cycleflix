@@ -42,13 +42,6 @@ export function Header() {
           className="flex items-center" 
           whileHover={{ scale: 1.05 }} 
           whileTap={{ scale: 0.95 }}
-          onClick={(e) => {
-            e.preventDefault()
-            sessionStorage.setItem('showSplash', 'true')
-            setTimeout(() => {
-              window.location.href = '/'
-            }, 10)
-          }}
         >
           <motion.span
             className="text-2xl font-black tracking-tight flex items-baseline"
