@@ -1,44 +1,42 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
 let globalAudio: HTMLAudioElement | null = null
+let isMobile = false
 
 export function TudumSplash({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"black" | "logo" | "glow" | "disassemble">("black")
-  const [audioPlayed, setAudioPlayed] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [isReady, setIsReady] = useState(false)
 
-  const playTudumSound = async () => {
-    if (globalAudio) return // Already playing or played
+  useEffect(() => {
+    // Detect mobile device
+    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
     
-    try {
+    // Preload audio
+    if (!globalAudio) {
       globalAudio = new Audio()
       globalAudio.src = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3'
       globalAudio.volume = 0.6
       globalAudio.crossOrigin = 'anonymous'
-      
-      globalAudio.onended = () => {
-        globalAudio = null
-      }
-      
-      await globalAudio.play()
-      setAudioPlayed(true)
-    } catch (error) {
-      globalAudio = null
+      globalAudio.preload = 'auto'
+      globalAudio.onended = () => { globalAudio = null }
     }
-  }
-
-  useEffect(() => {
+    
+    // Fast start for mobile, quality for desktop
+    const timing = isMobile ? { logo: 100, glow: 400, disassemble: 1000, complete: 1300 } : { logo: 200, glow: 600, disassemble: 1400, complete: 1800 }
+    
+    setIsReady(true)
+    
     const logoTimer = setTimeout(() => {
       setPhase("logo")
       playTudumSound()
-    }, 200)
+    }, timing.logo)
     
-    const glowTimer = setTimeout(() => setPhase("glow"), 600)
-    const disassembleTimer = setTimeout(() => setPhase("disassemble"), 1400)
-    const completeTimer = setTimeout(() => onComplete(), 1800)
+    const glowTimer = setTimeout(() => setPhase("glow"), timing.glow)
+    const disassembleTimer = setTimeout(() => setPhase("disassemble"), timing.disassemble)
+    const completeTimer = setTimeout(() => onComplete(), timing.complete)
 
     return () => {
       clearTimeout(logoTimer)
@@ -48,8 +46,21 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
     }
   }, [])
 
+  const playTudumSound = async () => {
+    if (!globalAudio || globalAudio.currentTime > 0) return
+    try {
+      await globalAudio.play()
+    } catch (error) {
+      // Silent fail for mobile autoplay restrictions
+    }
+  }
+
   const NetflixN = () => (
-    <svg viewBox="0 0 100 100" className="w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48">
+    <svg 
+      viewBox="0 0 100 100" 
+      className={`${isMobile ? 'w-20 h-20' : 'w-32 h-32 md:w-48 md:h-48'}`}
+      style={{ willChange: 'transform' }}
+    >
       <defs>
         <linearGradient id="netflix-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#E50914" />
@@ -63,32 +74,46 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
     </svg>
   )
 
+  if (!isReady) {
+    return <div className="fixed inset-0 z-[100] bg-black" />
+  }
+
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden cursor-pointer" onClick={playTudumSound}>
-      <div className="relative">
+    <div 
+      className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden cursor-pointer"
+      onClick={playTudumSound}
+      style={{ transform: 'translateZ(0)' }} // Hardware acceleration
+    >
+      <div className="relative" style={{ willChange: 'transform' }}>
         {/* Netflix N Logo */}
         {phase !== "black" && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ 
               opacity: phase === "disassemble" ? 0 : 1,
               scale: 1
             }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            transition={{ 
+              duration: isMobile ? 0.25 : 0.4, 
+              ease: "easeOut",
+              type: "tween"
+            }}
+            style={{ willChange: 'transform, opacity' }}
           >
             <NetflixN />
           </motion.div>
         )}
 
-        {/* Glow effect */}
-        {phase === "glow" && (
+        {/* Glow effect - reduced on mobile */}
+        {phase === "glow" && !isMobile && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.6, 0.4] }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            animate={{ opacity: [0, 0.5, 0.3] }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            style={{ willChange: 'opacity' }}
           >
-            <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-48 md:h-48 bg-[#FF2A2A] opacity-20 blur-lg" />
+            <div className="w-32 h-32 md:w-48 md:h-48 bg-[#FF2A2A] opacity-15 blur-md" />
           </motion.div>
         )}
 
@@ -96,20 +121,20 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
         {phase === "disassemble" && (
           <div className="absolute inset-0 flex items-center justify-center">
             <motion.div
-              className="absolute w-3 h-32 sm:w-4 sm:h-40 md:w-5 md:h-56"
-              style={{ left: "calc(50% - 18px)" }}
+              className={`absolute ${isMobile ? 'w-2 h-20' : 'w-3 h-32 md:w-4 md:h-40'}`}
+              style={{ left: "calc(50% - 12px)", willChange: 'transform, opacity' }}
               initial={{ x: 0, opacity: 1 }}
-              animate={{ x: -40, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeIn" }}
+              animate={{ x: isMobile ? -25 : -40, opacity: 0 }}
+              transition={{ duration: isMobile ? 0.2 : 0.3, ease: "easeIn" }}
             >
               <div className="w-full h-full bg-gradient-to-b from-transparent via-[#E50914] to-transparent blur-sm" />
             </motion.div>
             <motion.div
-              className="absolute w-3 h-32 sm:w-4 sm:h-40 md:w-5 md:h-56"
-              style={{ left: "calc(50% + 14px)" }}
+              className={`absolute ${isMobile ? 'w-2 h-20' : 'w-3 h-32 md:w-4 md:h-40'}`}
+              style={{ left: "calc(50% + 8px)", willChange: 'transform, opacity' }}
               initial={{ x: 0, opacity: 1 }}
-              animate={{ x: 40, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeIn" }}
+              animate={{ x: isMobile ? 25 : 40, opacity: 0 }}
+              transition={{ duration: isMobile ? 0.2 : 0.3, ease: "easeIn" }}
             >
               <div className="w-full h-full bg-gradient-to-b from-transparent via-[#E50914] to-transparent blur-sm" />
             </motion.div>
@@ -117,9 +142,9 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
       
-      {!globalAudio && (
-        <div className="absolute bottom-8 text-white/50 text-xs sm:text-sm animate-pulse">
-          Tap for sound
+      {!globalAudio?.currentTime && (
+        <div className={`absolute bottom-8 text-white/50 animate-pulse ${isMobile ? 'text-xs' : 'text-sm'}`}>
+          {isMobile ? 'Tap' : 'Click'} for sound
         </div>
       )}
     </div>
