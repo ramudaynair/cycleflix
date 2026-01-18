@@ -1,46 +1,44 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
+
+let globalAudio: HTMLAudioElement | null = null
 
 export function TudumSplash({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"black" | "logo" | "glow" | "disassemble">("black")
   const [audioPlayed, setAudioPlayed] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const playTudumSound = async () => {
-    if (audioPlayed) return
+    if (audioPlayed || globalAudio) return
     
     try {
-      const audio = new Audio()
-      audio.src = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3'
-      audio.volume = 0.6
-      audio.crossOrigin = 'anonymous'
+      // Create persistent audio that won't be destroyed with component
+      globalAudio = new Audio()
+      globalAudio.src = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3'
+      globalAudio.volume = 0.6
+      globalAudio.crossOrigin = 'anonymous'
       
-      await audio.play()
+      // Clean up when audio ends
+      globalAudio.onended = () => {
+        globalAudio = null
+      }
+      
+      await globalAudio.play()
       setAudioPlayed(true)
-      console.log('Tudum sound played successfully')
+      console.log('Tudum sound started')
     } catch (error) {
       console.log('Audio failed:', error)
+      globalAudio = null
     }
   }
 
   useEffect(() => {
-    // Enable audio context on any user interaction
-    const enableAudio = () => {
-      playTudumSound()
-      document.removeEventListener('click', enableAudio)
-      document.removeEventListener('touchstart', enableAudio)
-      document.removeEventListener('keydown', enableAudio)
-    }
-    
-    document.addEventListener('click', enableAudio)
-    document.addEventListener('touchstart', enableAudio)
-    document.addEventListener('keydown', enableAudio)
-    
-    // Start animation sequence
+    // Try to play immediately when logo appears
     const logoTimer = setTimeout(() => {
       setPhase("logo")
-      playTudumSound() // Try to play sound when logo appears
+      playTudumSound()
     }, 300)
     
     const glowTimer = setTimeout(() => setPhase("glow"), 900)
@@ -52,9 +50,7 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
       clearTimeout(glowTimer)
       clearTimeout(disassembleTimer)
       clearTimeout(completeTimer)
-      document.removeEventListener('click', enableAudio)
-      document.removeEventListener('touchstart', enableAudio)
-      document.removeEventListener('keydown', enableAudio)
+      // Don't destroy globalAudio here - let it finish playing
     }
   }, [])
 
