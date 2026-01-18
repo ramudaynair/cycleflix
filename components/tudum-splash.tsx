@@ -1,34 +1,48 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 
 export function TudumSplash({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"black" | "logo" | "glow" | "disassemble">("black")
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const hasPlayedRef = useRef(false)
+  const [audioPlayed, setAudioPlayed] = useState(false)
+
+  const playTudumSound = async () => {
+    if (audioPlayed) return
+    
+    try {
+      const audio = new Audio()
+      audio.src = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3'
+      audio.volume = 0.6
+      audio.crossOrigin = 'anonymous'
+      
+      await audio.play()
+      setAudioPlayed(true)
+      console.log('Tudum sound played successfully')
+    } catch (error) {
+      console.log('Audio failed:', error)
+    }
+  }
 
   useEffect(() => {
-    // Create audio element
-    audioRef.current = new Audio('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3')
-    audioRef.current.volume = 0.7
-    audioRef.current.preload = 'auto'
-    
-    // Try to play audio immediately
-    const playAudio = async () => {
-      if (audioRef.current && !hasPlayedRef.current) {
-        try {
-          await audioRef.current.play()
-          hasPlayedRef.current = true
-        } catch (error) {
-          console.log('Autoplay blocked, will play on interaction')
-        }
-      }
+    // Enable audio context on any user interaction
+    const enableAudio = () => {
+      playTudumSound()
+      document.removeEventListener('click', enableAudio)
+      document.removeEventListener('touchstart', enableAudio)
+      document.removeEventListener('keydown', enableAudio)
     }
     
-    playAudio()
-
-    const logoTimer = setTimeout(() => setPhase("logo"), 300)
+    document.addEventListener('click', enableAudio)
+    document.addEventListener('touchstart', enableAudio)
+    document.addEventListener('keydown', enableAudio)
+    
+    // Start animation sequence
+    const logoTimer = setTimeout(() => {
+      setPhase("logo")
+      playTudumSound() // Try to play sound when logo appears
+    }, 300)
+    
     const glowTimer = setTimeout(() => setPhase("glow"), 900)
     const disassembleTimer = setTimeout(() => setPhase("disassemble"), 1900)
     const completeTimer = setTimeout(() => onComplete(), 2400)
@@ -38,23 +52,11 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
       clearTimeout(glowTimer)
       clearTimeout(disassembleTimer)
       clearTimeout(completeTimer)
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
+      document.removeEventListener('click', enableAudio)
+      document.removeEventListener('touchstart', enableAudio)
+      document.removeEventListener('keydown', enableAudio)
     }
   }, [])
-
-  const handleClick = async () => {
-    if (audioRef.current && !hasPlayedRef.current) {
-      try {
-        await audioRef.current.play()
-        hasPlayedRef.current = true
-      } catch (error) {
-        console.log('Audio play failed:', error)
-      }
-    }
-  }
 
   const NetflixN = () => (
     <svg viewBox="0 0 100 100" className="w-32 h-32 md:w-48 md:h-48">
@@ -77,7 +79,7 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      onClick={handleClick}
+      onClick={playTudumSound}
     >
       <div className="relative">
         {/* Netflix N Logo */}
@@ -106,10 +108,9 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
-        {/* Disassembly light strips - matching N shape */}
+        {/* Disassembly light strips */}
         {phase === "disassemble" && (
           <div className="absolute inset-0 flex items-center justify-center">
-            {/* Left vertical bar of N */}
             <motion.div
               className="absolute w-4 h-40 md:w-5 md:h-56"
               style={{ left: "calc(50% - 24px)" }}
@@ -119,8 +120,6 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
             >
               <div className="w-full h-full bg-gradient-to-b from-transparent via-[#E50914] to-transparent blur-sm" />
             </motion.div>
-
-            {/* Diagonal bar of N */}
             <motion.div
               className="absolute w-3 h-40 md:w-4 md:h-56"
               style={{ left: "calc(50% - 2px)", transform: "rotate(15deg)" }}
@@ -130,8 +129,6 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
             >
               <div className="w-full h-full bg-gradient-to-b from-transparent via-[#E50914] to-transparent blur-sm" />
             </motion.div>
-
-            {/* Right vertical bar of N */}
             <motion.div
               className="absolute w-4 h-40 md:w-5 md:h-56"
               style={{ left: "calc(50% + 20px)" }}
@@ -145,10 +142,9 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
       
-      {/* Click instruction for audio */}
-      {!hasPlayedRef.current && (
+      {!audioPlayed && (
         <div className="absolute bottom-8 text-white/50 text-sm animate-pulse">
-          Click anywhere for sound
+          Click for sound
         </div>
       )}
     </motion.div>
