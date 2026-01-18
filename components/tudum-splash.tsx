@@ -1,38 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function TudumSplash({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"black" | "logo" | "glow" | "disassemble">("black")
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const hasPlayedRef = useRef(false)
 
   useEffect(() => {
+    // Create audio element
+    audioRef.current = new Audio('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3')
+    audioRef.current.volume = 0.7
+    audioRef.current.preload = 'auto'
+    
+    // Try to play audio immediately
     const playAudio = async () => {
-      try {
-        const audio = new Audio("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3")
-        audio.volume = 0.8
-        audio.preload = 'auto'
-        
-        // Try to play immediately
-        await audio.play()
-      } catch (error) {
-        console.log('Audio autoplay blocked:', error)
-        
-        // Fallback: play on any user interaction
-        const playOnInteraction = async () => {
-          try {
-            const audio = new Audio("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3")
-            audio.volume = 0.8
-            await audio.play()
-            document.removeEventListener('click', playOnInteraction)
-            document.removeEventListener('touchstart', playOnInteraction)
-          } catch (err) {
-            console.log('Audio play failed:', err)
-          }
+      if (audioRef.current && !hasPlayedRef.current) {
+        try {
+          await audioRef.current.play()
+          hasPlayedRef.current = true
+        } catch (error) {
+          console.log('Autoplay blocked, will play on interaction')
         }
-        
-        document.addEventListener('click', playOnInteraction)
-        document.addEventListener('touchstart', playOnInteraction)
       }
     }
     
@@ -48,8 +38,23 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
       clearTimeout(glowTimer)
       clearTimeout(disassembleTimer)
       clearTimeout(completeTimer)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
     }
   }, [])
+
+  const handleClick = async () => {
+    if (audioRef.current && !hasPlayedRef.current) {
+      try {
+        await audioRef.current.play()
+        hasPlayedRef.current = true
+      } catch (error) {
+        console.log('Audio play failed:', error)
+      }
+    }
+  }
 
   const NetflixN = () => (
     <svg viewBox="0 0 100 100" className="w-32 h-32 md:w-48 md:h-48">
@@ -72,15 +77,7 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: "easeInOut" }}
-      onClick={async () => {
-        try {
-          const audio = new Audio("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/netflix-tudum-sfx-n-c-zAKXEHBYl3ICOeHH6eA6pqwzZFt9sF.mp3")
-          audio.volume = 0.8
-          await audio.play()
-        } catch (error) {
-          console.log('Audio play failed on click:', error)
-        }
-      }}
+      onClick={handleClick}
     >
       <div className="relative">
         {/* Netflix N Logo */}
@@ -147,6 +144,13 @@ export function TudumSplash({ onComplete }: { onComplete: () => void }) {
           </div>
         )}
       </div>
+      
+      {/* Click instruction for audio */}
+      {!hasPlayedRef.current && (
+        <div className="absolute bottom-8 text-white/50 text-sm animate-pulse">
+          Click anywhere for sound
+        </div>
+      )}
     </motion.div>
   )
 }
