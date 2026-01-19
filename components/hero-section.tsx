@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Play } from "lucide-react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion } from "framer-motion"
 import { useRef } from "react"
 
 const openNetflix = () => {
@@ -11,14 +11,6 @@ const openNetflix = () => {
 
 export function HeroSection() {
   const ref = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  })
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9])
 
   return (
     <section
@@ -39,7 +31,7 @@ export function HeroSection() {
             opacity: [0.15, 0.25, 0.15],
           }}
           transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E50914]/15 rounded-full blur-[200px]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E50914]/15 rounded-full blur-[200px] morph-shape"
         />
         <motion.div
           animate={{
@@ -60,7 +52,7 @@ export function HeroSection() {
         />
       </div>
 
-      <motion.div style={{ y, opacity, scale }} className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+      <motion.div className="relative z-10 text-center px-6 max-w-5xl mx-auto velocity-blur">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,7 +65,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4 }}
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-none mb-6 text-balance flex items-baseline justify-center"
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-none mb-6 text-balance flex items-baseline justify-center text-reveal"
         >
           <span className="text-[#E50914] drop-shadow-[0_0_30px_rgba(229,9,20,0.8)]">C</span>
           <span className="text-white">YCLE</span>
@@ -85,7 +77,7 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="text-lg sm:text-xl md:text-2xl text-white/60 mb-12 max-w-2xl mx-auto text-pretty"
         >
-          Stream while you ride. The world's first Netflix-integrated bicycle with smart helmet and entertainment display.
+          Stream while you ride. The world's first Netflix-integrated bicycle with smart display that switches between audio-only while pedaling and full video when stationary for the ultimate safe entertainment experience.
         </motion.p>
 
         <motion.div
@@ -97,9 +89,9 @@ export function HeroSection() {
           <Button
             size="lg"
             className="bg-[#E50914] hover:bg-[#b8070f] text-white text-lg px-10 py-6 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(229,9,20,0.5)]"
-            onClick={() => document.getElementById('bike-showcase')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => window.location.href = '/preorder'}
           >
-            Configure
+            Configure Your CYCLEFLIX N1
           </Button>
           <Button
             variant="outline"

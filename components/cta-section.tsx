@@ -62,7 +62,7 @@ export function CTASection() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-white/50 text-lg md:text-xl max-w-2xl mx-auto mb-10"
           >
-            Join the waitlist for exclusive early access and be among the first to experience the N1.
+            Join the revolution and be among the first to experience the CYCLEFLIX N1. Configure your perfect setup and secure your pre-order today.
           </motion.p>
 
           <motion.div
@@ -74,7 +74,7 @@ export function CTASection() {
             <Button
               size="lg"
               className="bg-[#E50914] hover:bg-[#b8070f] text-white text-lg px-12 py-7 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(229,9,20,0.5)] group relative overflow-hidden"
-              onClick={() => window.open('/cart', '_blank')}
+              onClick={() => window.location.href = '/preorder'}
             >
               <motion.div
                 animate={{ x: ["-100%", "200%"] }}
@@ -82,7 +82,7 @@ export function CTASection() {
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
               />
               <span className="relative z-10 flex items-center">
-                Pre Book Now
+                Pre-Order Now
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </span>
             </Button>
@@ -94,7 +94,7 @@ export function CTASection() {
             transition={{ duration: 0.6, delay: 1 }}
             className="text-white/30 text-sm mt-8"
           >
-            Starting at $4,999 · Free shipping · 2-year warranty
+            Starting at $2,999 · Expected {new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })} · 2-year warranty
           </motion.p>
         </motion.div>
       </div>
