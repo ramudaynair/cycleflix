@@ -62,6 +62,18 @@ export function Header() {
           href="/" 
           className="flex items-center"
           style={{ willChange: 'transform' }}
+          onClick={(e) => {
+            e.preventDefault()
+            if (window.location.pathname !== '/') {
+              // On privacy/terms pages, go directly to main page without tudum
+              sessionStorage.setItem('skipSplash', 'true')
+              router.push('/')
+            } else {
+              // On main page, trigger tudum splash
+              sessionStorage.removeItem('skipSplash')
+              window.location.reload()
+            }
+          }}
         >
           <span
             className={`font-black tracking-tight flex items-baseline transition-all duration-200 ${
