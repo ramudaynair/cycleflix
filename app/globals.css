@@ -123,6 +123,16 @@
   }
 }
 
+/* Scroll containers need position relative for Framer Motion */
+.scroll-container {
+  position: relative;
+}
+
+/* Main content wrapper */
+main {
+  position: relative;
+}
+
 html {
   scroll-behavior: smooth;
 }

@@ -10,22 +10,29 @@ export default function Home() {
   const [contentReady, setContentReady] = useState(false)
 
   useEffect(() => {
+    const skipSplash = sessionStorage.getItem('skipSplash')
     const savedScrollY = sessionStorage.getItem('scrollPosition')
-    const scrollPosition = savedScrollY ? parseInt(savedScrollY) : 0
     
-    // Show splash if at top or first visit
-    if (!savedScrollY || scrollPosition < 100) {
-      setShowSplash(true)
-    } else {
+    console.log('Page load - skipSplash:', skipSplash, 'scrollPosition:', savedScrollY)
+    
+    // Always skip splash if coming from any other page
+    if (skipSplash === 'true' || window.history.length > 1) {
       setContentReady(true)
-    }
-    
-    // Restore scroll position
-    if (savedScrollY && scrollPosition >= 100) {
+      if (savedScrollY) {
+        const scrollPosition = parseInt(savedScrollY)
+        setTimeout(() => {
+          window.scrollTo(0, scrollPosition)
+          console.log('Restored scroll to:', scrollPosition)
+        }, 100)
+      }
+      // Clean up after restoring
       setTimeout(() => {
-        window.scrollTo(0, scrollPosition)
+        sessionStorage.removeItem('skipSplash')
         sessionStorage.removeItem('scrollPosition')
-      }, 100)
+      }, 500)
+    } else {
+      // Only show splash on fresh page load
+      setShowSplash(true)
     }
   }, [])
 
@@ -54,6 +61,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
+          className="relative"
         >
           <HomeContent />
         </motion.div>

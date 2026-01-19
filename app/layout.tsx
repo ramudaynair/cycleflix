@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SmoothScroll } from "@/components/smooth-scroll"
 import { GSAPAnimations } from "@/components/gsap-animations"
+import { PageTransition } from "@/components/page-transition"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -30,11 +31,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
+    <html lang="en" data-scroll-behavior="smooth">
+      <body className={`font-sans antialiased relative`}>
         <SmoothScroll />
         <GSAPAnimations />
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
         <Analytics />
       </body>
     </html>

@@ -14,7 +14,9 @@ export default function Privacy() {
   const router = useRouter()
 
   const handleBack = () => {
+    console.log('Privacy back button clicked')
     sessionStorage.setItem('skipSplash', 'true')
+    // Don't overwrite the scroll position - it should already be saved from main page
     router.push('/')
   }
   return (

@@ -2,22 +2,14 @@
 
 import { useState } from "react"
 import { TudumSplash } from "@/components/tudum-splash"
-import { ParticleSplash } from "@/components/particle-splash"
-import { ThreeDSplash } from "@/components/threejs-splash"
-import { GlitchSplash } from "@/components/glitch-splash"
-import { LiquidSplash } from "@/components/liquid-splash"
 
-type AnimationType = "original" | "particle" | "threejs" | "glitch" | "liquid" | null
+type AnimationType = "original" | null
 
 export default function AnimationDemo() {
   const [currentAnimation, setCurrentAnimation] = useState<AnimationType>(null)
 
   const animations = [
-    { id: "original", name: "Original Netflix Style", component: TudumSplash },
-    { id: "particle", name: "Particle Explosion", component: ParticleSplash },
-    { id: "threejs", name: "3D Rotating Logo", component: ThreeDSplash },
-    { id: "glitch", name: "Glitch Matrix Effect", component: GlitchSplash },
-    { id: "liquid", name: "Liquid Morphing", component: LiquidSplash },
+    { id: "original", name: "Netflix Style Tudum", component: TudumSplash },
   ]
 
   const handleComplete = () => {
@@ -30,10 +22,10 @@ export default function AnimationDemo() {
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">
-          <span className="text-[#E50914]">CYCLEFLIX</span> Animation Options
+          <span className="text-[#E50914]">CYCLEFLIX</span> Animation Demo
         </h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8">
           {animations.map((animation) => (
             <button
               key={animation.id}
@@ -44,7 +36,7 @@ export default function AnimationDemo() {
                 {animation.name}
               </h3>
               <p className="text-gray-400 text-sm">
-                Click to preview this animation style
+                Click to preview the Netflix-style intro animation
               </p>
             </button>
           ))}
@@ -52,7 +44,7 @@ export default function AnimationDemo() {
 
         <div className="text-center">
           <p className="text-gray-400 mb-4">
-            Choose an animation style above to see it in action
+            Experience the authentic Netflix intro with audio
           </p>
           {currentAnimation && (
             <button
