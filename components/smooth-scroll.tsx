@@ -9,6 +9,9 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function SmoothScroll() {
   useEffect(() => {
+    // Ensure body has proper positioning for scroll calculations
+    document.body.style.position = 'relative'
+    
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -36,6 +39,8 @@ export function SmoothScroll() {
     return () => {
       lenis.destroy()
       gsap.ticker.remove(raf)
+      // Reset body positioning
+      document.body.style.position = ''
     }
   }, [])
 

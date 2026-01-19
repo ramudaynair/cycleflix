@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useRef, useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -26,15 +26,6 @@ export function BikeShowcase() {
   const ref = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(0)
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.05, 0.95])
-  const rotateY = useTransform(scrollYProgress, [0, 0.5, 1], [-5, 0, 5])
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0.5])
 
   const swipeConfidenceThreshold = 10000
   const swipePower = (offset: number, velocity: number) => {
@@ -72,7 +63,7 @@ export function BikeShowcase() {
   }
 
   return (
-    <section ref={ref} className="bg-black py-24 md:py-32 overflow-hidden" id="bike-showcase">
+    <section ref={ref} className="bg-black py-24 md:py-32 overflow-hidden relative" id="bike-showcase">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -100,10 +91,9 @@ export function BikeShowcase() {
           />
 
           <motion.div
-            style={{ scale, rotateY, opacity }}
-            className="relative z-10 flex items-center justify-center py-8 perspective-1000"
+            className="relative z-10 flex items-center justify-center py-8"
           >
-            <div className="relative w-full max-w-4xl mx-auto aspect-[16/10] overflow-hidden">
+            <div className="relative w-full max-w-4xl mx-auto aspect-[16/10] overflow-hidden group">
               <AnimatePresence initial={false} custom={direction}>
                 <motion.img
                   key={currentIndex}
@@ -130,12 +120,21 @@ export function BikeShowcase() {
                       paginate(-1)
                     }
                   }}
-                  className="absolute w-full h-full object-contain cursor-grab active:cursor-grabbing"
+                  whileHover={{ scale: 1.05, rotateY: 2 }}
+                  className="absolute w-full h-full object-contain cursor-grab active:cursor-grabbing transition-all duration-300 group-hover:filter group-hover:brightness-110"
                   style={{
                     filter: "drop-shadow(0 0 80px rgba(229,9,20,0.4)) drop-shadow(0 20px 40px rgba(0,0,0,0.8))",
+                    transformStyle: "preserve-3d",
                   }}
                 />
               </AnimatePresence>
+              
+              {/* Zoom overlay on hover */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"
+              />
             </div>
 
             <button

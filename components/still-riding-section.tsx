@@ -1,18 +1,11 @@
 "use client"
 
-import { motion, useInView, useScroll, useTransform } from "framer-motion"
+import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 
 export function StillRidingSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-
-  const imageY = useTransform(scrollYProgress, [0, 1], [50, -50])
-  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.95, 1.05, 1])
 
   const features = [
     '5" AMOLED touch display',
@@ -22,7 +15,7 @@ export function StillRidingSection() {
   ]
 
   return (
-    <section ref={ref} id="engineering" className="bg-black py-24 md:py-32 overflow-hidden">
+    <section ref={ref} id="engineering" className="bg-black py-24 md:py-32 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Text Content */}
@@ -74,12 +67,11 @@ export function StillRidingSection() {
           </div>
 
           {/* Image */}
-          <motion.div className="order-1 lg:order-2 relative group" style={{ y: imageY }}>
+          <motion.div className="order-1 lg:order-2 relative group">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
               animate={isInView ? { opacity: 1, scale: 1, rotate: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
-              style={{ scale: imageScale }}
               className="relative rounded-lg overflow-hidden"
             >
               <img
