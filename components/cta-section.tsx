@@ -10,7 +10,7 @@ export function CTASection() {
   const isInView = useInView(ref, { once: true, margin: "-50px" })
 
   return (
-    <section className="bg-black py-24 md:py-32 relative overflow-hidden">
+    <section className="bg-black py-24 md:py-32 relative overflow-hidden" data-section="preorder">
       <div className="absolute inset-0 flex items-center justify-center">
         <motion.div
           animate={{
